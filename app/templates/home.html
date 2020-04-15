@@ -3,17 +3,17 @@
 <head>
   <meta charset="utf-8" />
   <title>MindBridge Ai vs Shopify folding@home</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.js"></script>
 </head>
 
 <body>
   <center>
     <div class="container" width="600" height="400">
-      <canvas id="examChart"></canvas>
+      <canvas id="chart"></canvas>
     </div>
 
     <script>
-      var ctx = document.getElementById("examChart").getContext("2d");
+      var ctx = document.getElementById("chart").getContext("2d");
 
       var myChart = new Chart(ctx, {
         type: 'line',
@@ -22,25 +22,24 @@
             fill: false,
             label: 'Shopify',
             data: [{{data_points['Shopify'] | safe}}],
-            borderColor: [
-              '#95bf46'
-            ],
+            borderColor: '#95bf46',
             borderWidth: 3
           },
           {
             fill: false,
             label: 'MindBridge Ai',
             data: [{{data_points['MindBridge Ai'] | safe}}],
-            borderColor: [
-              '#32a0ff'
-            ],
+            borderColor: '#32a0ff',
             borderWidth: 3
           }]
         },
         options: {
           scales: {
             xAxes: [{
-              type: 'time'
+              type: 'time',
+              time: {
+                unit: 'day'
+              }
             }]
           }
         }
