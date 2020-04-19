@@ -8,8 +8,12 @@
 
 <body>
   <center>
-    <div class="container" width="600" height="400">
+    <div class="container">
       <canvas id="chart"></canvas>
+    </div>
+
+    <div class="container">
+      <canvas id="shopifyLead"></canvas>
     </div>
 
     <script>
@@ -21,19 +25,38 @@
           datasets: [{
             fill: false,
             label: 'Shopify',
-            data: [{{data_points['Shopify'] | safe}}],
+            data: [
+              {% for timestamp, credits in data['Shopify'] %}
+                {
+                  t: new Date('{{timestamp}}'),
+                  y: {{credits}}
+                },
+              {% endfor %}
+            ],
             borderColor: '#95bf46',
             borderWidth: 3
           },
           {
             fill: false,
             label: 'MindBridge Ai',
-            data: [{{data_points['MindBridge Ai'] | safe}}],
+            data: [
+              {% for timestamp, credits in data['MindBridge Ai'] %}
+                {
+                  t: new Date('{{timestamp}}'),
+                  y: {{credits}}
+                },
+              {% endfor %}
+            ],
             borderColor: '#32a0ff',
             borderWidth: 3
           }]
         },
         options: {
+          elements: {
+            point: {
+              radius: 0
+            }
+          },
           scales: {
             xAxes: [{
               scaleLabel: {
@@ -54,6 +77,77 @@
           }
         }
       });
+
+      // const colours = data.map((value) => value < 0 ? '#95bf46' : '#32a0ff');
+
+      const data = {{diff_data}};
+
+      var ctx2 = document.getElementById("shopifyLead").getContext("2d");
+
+      var shopifyLeadChart = new Chart(ctx2, {
+        type: 'line',
+        data: {
+          datasets: [{
+            data: [
+            {% for timestamp, credits in shopify_lead %}
+              {
+                t: new Date('{{timestamp}}'),
+                y: {{credits}}
+              },
+            {% endfor %}
+            ],
+            borderWidth: 0,
+            borderColor: '#888',
+          }]
+        },
+        plugins: [{
+          beforeRender: function (x, options) {
+            var c = x.chart
+            var dataset = x.data.datasets[0];
+            var yScale = x.scales['y-axis-0'];
+            var yPos = yScale.getPixelForValue(0);
+
+            var gradientFill = c.ctx.createLinearGradient(0, 0, 0, c.height);
+            gradientFill.addColorStop(0, '#95bf46');
+            gradientFill.addColorStop(yPos / c.height - 0.01, '#95bf46');
+            gradientFill.addColorStop(yPos / c.height + 0.01, '#32a0ff');
+            gradientFill.addColorStop(1, '#32a0ff');
+
+            var model = x.data.datasets[0]._meta[Object.keys(dataset._meta)[0]].dataset._model;
+            model.backgroundColor = gradientFill;
+          }
+        }],
+        options: {
+          maintainAspectRatio: false,
+          legend: {
+            display: false
+          },
+          elements: {
+            point: {
+              radius: 0
+            }
+          },
+          scales: {
+            xAxes: [{
+              scaleLabel: {
+                display: true,
+                labelString: 'UTC'
+              },
+              type: 'time',
+              time: {
+                unit: 'day'
+              }
+            }],
+            yAxes: [{
+              scaleLabel: {
+                display: true,
+                labelString: 'Shopify Lead'
+              }
+            }]
+          }
+        }
+      });
+
 
     </script>
   </center>

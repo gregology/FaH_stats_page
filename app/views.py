@@ -8,20 +8,22 @@ import csv
 
 @app.route('/')
 def home():
+  raw_data = list(csv.DictReader(open('data.csv'), delimiter=','))
 
-  a = csv.DictReader(open('data.csv'), delimiter=',')
-  data = [x for x in a]
-
-  data_points = {
-    'MindBridge Ai': '',
-    'Shopify': '',
+  data = {
+    'MindBridge Ai': [],
+    'Shopify': [],
   }
 
-  for point in data:
-    data_points[point['Team']] += f"{{t: new Date('{point['Datetime']}'), y: {point['Credits']}}},"
+  shopify_lead = [(raw_data[0]['Datetime'], 0)]
 
-  return render_template('home.html', data_points=data_points)
-  return "hello world!"
+  for row in raw_data:
+    data[row['Team']].append((row['Datetime'], int(row['Credits'])))
+    if row['Datetime'] > '2020-04-14 12:30:00':
+      shopify_lead.append((row['Datetime'], data['Shopify'][-1][1] - data['MindBridge Ai'][-1][1]))
+
+  diff_data = [i[1] for i in shopify_lead]
+  return render_template('home.html', data=data, shopify_lead=shopify_lead, diff_data=diff_data)
 
 @app.route('/extract')
 def extract():
